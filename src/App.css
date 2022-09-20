@@ -39,3 +39,19 @@
     transform: rotate(360deg);
   }
 }
+
+table tr:nth-child( even ) {
+  background-color: #f2f2f2;
+}
+
+table tr:hover {
+  background-color: #ddd;
+}
+
+table th {
+  background-color: #04aa6d;
+  color: white;
+  padding-bottom: 12px;
+  padding-top: 12px;
+  text-align: left;
+}
