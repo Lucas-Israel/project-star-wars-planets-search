@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Proptypes from 'prop-types';
 import Context from './Context';
 
@@ -18,9 +18,10 @@ function Provider({ children }) {
     }
   };
 
+  useEffect(() => { getPlanets(); }, []);
+
   const contextValue = {
     planets,
-    getPlanets,
   };
 
   return (
