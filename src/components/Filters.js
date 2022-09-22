@@ -13,7 +13,6 @@ const INITIAL_FILTER_STATE = {
 
 function Filters() {
   const {
-    planets,
     inputFilterName,
     inputHandler,
     filterByNumericValues,
@@ -24,13 +23,8 @@ function Filters() {
   const [aditionalCondition, setAditionalCondition] = useState(false);
 
   useEffect(() => {
-    const settingColumnFilter = async () => {
-      setColumnFilter(Object.keys(await planets[0])
-        .filter((elem) => selectValues.includes(elem))
-        .map((item) => item));
-    };
-    if (planets.length > 0) settingColumnFilter();
-  }, [planets]);
+    setColumnFilter(selectValues);
+  }, []);
 
   useEffect(() => {
     const ghi = () => {
@@ -39,8 +33,7 @@ function Filters() {
       setAditionalCondition(false);
       return def;
     };
-    if (filterByNumericValues.length > 0
-      && aditionalCondition === true) setColumnFilter(ghi());
+    if (aditionalCondition === true) setColumnFilter(ghi());
   }, [filterByNumericValues, aditionalCondition, columnFilter]);
 
   const rangeForRandom = 9999999999;
@@ -57,13 +50,39 @@ function Filters() {
     }));
   };
 
-  const setFilterStateToGlobal = () => {
-    setFilterByNumericValues((before) => ([
+  useEffect(() => {
+    setFilterState((before) => ({
       ...before,
-      filterState,
-    ]));
-    setAditionalCondition(true);
+      column: columnFilter[0],
+    }));
+  }, [columnFilter]);
+
+  const setFilterStateToGlobal = () => {
+    if (columnFilter.length > 0) {
+      setFilterByNumericValues((before) => ([
+        ...before,
+        filterState,
+      ]));
+      setAditionalCondition(true);
+    }
   };
+
+  const filterDelClick = ({ target }) => {
+    const { value: columnFilterValue } = target;
+    setAditionalCondition(true);
+    setFilterByNumericValues(
+      filterByNumericValues
+        .filter(({ column: filByNumVal }) => filByNumVal !== columnFilterValue),
+    );
+    setColumnFilter((before) => before.concat(columnFilterValue));
+  };
+
+  const delAllFiltersClick = () => {
+    setAditionalCondition(true);
+    setFilterByNumericValues([]);
+    setColumnFilter(selectValues);
+  };
+
   return (
     <section>
       <label htmlFor="inputNameFilter">
@@ -90,8 +109,9 @@ function Filters() {
           name="column"
           value={ column }
           onChange={ filterHandler }
+          onClick={ filterHandler }
         >
-          {columnFilter.sort().map((item) => <option key={ random() }>{item}</option>)}
+          {columnFilter.map((item) => <option key={ random() }>{item}</option>)}
         </select>
       </label>
 
@@ -134,6 +154,39 @@ function Filters() {
         Filtrar
 
       </button>
+      <div>
+        Filtros:
+        {' '}
+        {
+          filterByNumericValues.length > 0 && filterByNumericValues
+            .map(({ column: coluna }) => (
+              <div
+                key={ random() }
+                data-testid="filter"
+              >
+                {coluna}
+                {' '}
+                <button
+                  type="button"
+                  value={ coluna }
+                  onClick={ filterDelClick }
+                >
+                  deletar
+
+                </button>
+              </div>))
+        }
+      </div>
+      <div>
+        <button
+          type="button"
+          data-testid="button-remove-filters"
+          onClick={ delAllFiltersClick }
+        >
+          Remover filtros
+
+        </button>
+      </div>
     </section>
   );
 }
