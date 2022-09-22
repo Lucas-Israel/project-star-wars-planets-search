@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Context from '../context/Context';
 
 const selectValues = [
@@ -16,9 +16,31 @@ function Filters() {
     planets,
     inputFilterName,
     inputHandler,
-    // filterByNumericValues,
+    filterByNumericValues,
     setFilterByNumericValues,
   } = useContext(Context);
+
+  const [columnFilter, setColumnFilter] = useState([]);
+
+  useEffect(() => {
+    const settingColumnFilter = async () => {
+      setColumnFilter(Object.keys(await planets[0])
+        .filter((elem) => selectValues.includes(elem))
+        .map((item) => item));
+    };
+    if (planets.length > 0) settingColumnFilter();
+  }, [planets]);
+
+  useEffect(() => {
+    if (filterByNumericValues.length > 0) {
+      const abc = filterByNumericValues.map(({ column }) => column);
+      const def = columnFilter.filter((r) => !abc.includes(r));
+      setColumnFilter(def);
+    }
+  }, [filterByNumericValues]); // eslint-disable-line
+
+  const rangeForRandom = 9999999999;
+  const random = () => Math.floor(Math.random() * rangeForRandom);
 
   const [filterState, setFilterState] = useState(INITIAL_FILTER_STATE);
   const { column, comparison, value } = filterState;
@@ -37,9 +59,6 @@ function Filters() {
       filterState,
     ]));
   };
-
-  const rangeForRandom = 9999999999;
-  const random = () => Math.floor(Math.random() * rangeForRandom);
   return (
     <section>
       <label htmlFor="inputNameFilter">
@@ -67,10 +86,7 @@ function Filters() {
           value={ column }
           onChange={ filterHandler }
         >
-          {planets.length > 0
-          && Object.keys(planets[0])
-            .filter((elem) => selectValues.includes(elem))
-            .map((item) => <option key={ random() }>{item}</option>)}
+          {columnFilter.sort().map((item) => <option key={ random() }>{item}</option>)}
         </select>
       </label>
 
