@@ -4,21 +4,25 @@ import Context from './Context';
 
 const urlToFetch = 'https://swapi.dev/api/planets';
 
+const selectValues = [
+  'population', 'orbital_period', 'diameter', 'rotation_period', 'surface_water',
+];
+
+const rangeForRandom = 9999999999;
+const random = () => Math.floor(Math.random() * rangeForRandom);
+
 function Provider({ children }) {
   const [planets, setPlanets] = useState([]);
   const [inputFilterName, setInputFilterName] = useState('');
   const [filterByNumericValues, setFilterByNumericValues] = useState([]);
   const [showPlanets, setShowPlanets] = useState([]);
+  const [order, setOrder] = useState({});
 
   const getPlanets = async () => {
-    try {
-      const data0 = await fetch(urlToFetch).then((info) => info.json());
-      const data1 = data0.results;
-      const results = data1.filter((item) => delete item.residents);
-      setPlanets(results);
-    } catch (e) {
-      console.log(e.message);
-    }
+    const data0 = await fetch(urlToFetch).then((info) => info.json());
+    const data1 = data0.results;
+    const results = data1.filter((item) => delete item.residents);
+    setPlanets(results);
   };
 
   const inputHandler = ({ target }) => {
@@ -41,22 +45,19 @@ function Provider({ children }) {
     let planetasFiltrados = planets;
     const filterParameters = (param) => {
       const { column, comparison, value } = param;
-      switch (comparison) {
-      case 'igual a':
+      if (comparison === 'igual a') {
         planetasFiltrados = planetasFiltrados
           .filter((planet) => +planet[column] === +value);
-        break;
-      case 'maior que':
+      }
+      if (comparison === 'maior que') {
         planetasFiltrados = planetasFiltrados
           .filter((planet) => +planet[column] > +value);
-        break;
-      case 'menor que':
+      }
+      if (comparison === 'menor que') {
         planetasFiltrados = planetasFiltrados
           .filter((planet) => +planet[column] < +value);
-        break;
-      default:
-        break;
       }
+      return planetasFiltrados;
     };
 
     if (planets.length > 0 && filterByNumericValues.length > 0) {
@@ -72,6 +73,10 @@ function Provider({ children }) {
     filterByNumericValues,
     setFilterByNumericValues,
     showPlanets,
+    order,
+    setOrder,
+    selectValues,
+    random,
   };
 
   return (

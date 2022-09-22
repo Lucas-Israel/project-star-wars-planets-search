@@ -1,10 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Context from '../context/Context';
 
-const selectValues = [
-  'population', 'orbital_period', 'diameter', 'rotation_period', 'surface_water',
-];
-
 const INITIAL_FILTER_STATE = {
   column: 'population',
   comparison: 'maior que',
@@ -17,6 +13,8 @@ function Filters() {
     inputHandler,
     filterByNumericValues,
     setFilterByNumericValues,
+    selectValues,
+    random,
   } = useContext(Context);
 
   const [columnFilter, setColumnFilter] = useState([]);
@@ -24,7 +22,7 @@ function Filters() {
 
   useEffect(() => {
     setColumnFilter(selectValues);
-  }, []);
+  }, [selectValues]);
 
   useEffect(() => {
     const ghi = () => {
@@ -35,9 +33,6 @@ function Filters() {
     };
     if (aditionalCondition === true) setColumnFilter(ghi());
   }, [filterByNumericValues, aditionalCondition, columnFilter]);
-
-  const rangeForRandom = 9999999999;
-  const random = () => Math.floor(Math.random() * rangeForRandom);
 
   const [filterState, setFilterState] = useState(INITIAL_FILTER_STATE);
   const { column, comparison, value } = filterState;
@@ -58,13 +53,11 @@ function Filters() {
   }, [columnFilter]);
 
   const setFilterStateToGlobal = () => {
-    if (columnFilter.length > 0) {
-      setFilterByNumericValues((before) => ([
-        ...before,
-        filterState,
-      ]));
-      setAditionalCondition(true);
-    }
+    setFilterByNumericValues((before) => ([
+      ...before,
+      filterState,
+    ]));
+    setAditionalCondition(true);
   };
 
   const filterDelClick = ({ target }) => {
@@ -100,28 +93,30 @@ function Filters() {
 
       <br />
 
-      <label htmlFor="column-filter">
+      <label htmlFor="column">
         Coluna:
         {' '}
         <select
-          id="column-filter"
           data-testid="column-filter"
           name="column"
           value={ column }
           onChange={ filterHandler }
-          onClick={ filterHandler }
         >
-          {columnFilter.map((item) => <option key={ random() }>{item}</option>)}
+          {columnFilter.map((item) => (
+            <option
+              key={ random() }
+            >
+              {item}
+            </option>))}
         </select>
       </label>
 
       <br />
 
-      <label htmlFor="comparison-filter">
+      <label htmlFor="comparison">
         Operador:
         {' '}
         <select
-          id="comparison-filter"
           data-testid="comparison-filter"
           name="comparison"
           value={ comparison }
@@ -159,13 +154,16 @@ function Filters() {
         {' '}
         {
           filterByNumericValues.length > 0 && filterByNumericValues
-            .map(({ column: coluna }) => (
+            .map(({ column: coluna, comparison: compara, value: vavalue }) => (
               <div
                 key={ random() }
                 data-testid="filter"
               >
                 {coluna}
                 {' '}
+                {compara}
+                {' '}
+                {vavalue}
                 <button
                   type="button"
                   value={ coluna }
