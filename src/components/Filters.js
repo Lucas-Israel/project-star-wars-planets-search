@@ -21,6 +21,7 @@ function Filters() {
   } = useContext(Context);
 
   const [columnFilter, setColumnFilter] = useState([]);
+  const [aditionalCondition, setAditionalCondition] = useState(false);
 
   useEffect(() => {
     const settingColumnFilter = async () => {
@@ -32,12 +33,15 @@ function Filters() {
   }, [planets]);
 
   useEffect(() => {
-    if (filterByNumericValues.length > 0) {
+    const ghi = () => {
       const abc = filterByNumericValues.map(({ column }) => column);
       const def = columnFilter.filter((r) => !abc.includes(r));
-      setColumnFilter(def);
-    }
-  }, [filterByNumericValues]); // eslint-disable-line
+      setAditionalCondition(false);
+      return def;
+    };
+    if (filterByNumericValues.length > 0
+      && aditionalCondition === true) setColumnFilter(ghi());
+  }, [filterByNumericValues, aditionalCondition, columnFilter]);
 
   const rangeForRandom = 9999999999;
   const random = () => Math.floor(Math.random() * rangeForRandom);
@@ -58,6 +62,7 @@ function Filters() {
       ...before,
       filterState,
     ]));
+    setAditionalCondition(true);
   };
   return (
     <section>
