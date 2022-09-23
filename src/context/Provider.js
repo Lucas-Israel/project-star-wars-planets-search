@@ -88,24 +88,22 @@ function Provider({ children }) {
 
   useEffect(() => {
     const sortParameters = (param) => {
-      let planetasSorteados = planets;
       setDoOrder(false);
       const { column, sort } = param;
       if (sort === 'ASC') {
-        planetasSorteados = planetasSorteados
+        showPlanets
           .sort((a, b) => b[column] - a[column]);
 
-        planetasSorteados = planetasSorteados
+        showPlanets
           .sort((a, b) => a[column] - b[column]);
       }
       if (sort === 'DESC') {
-        planetasSorteados = planetasSorteados
+        showPlanets
           .sort((a, b) => b[column] - a[column]);
       }
-      setShowPlanets(planetasSorteados);
     };
     if (doOrder) sortParameters(order);
-  }, [order, planets, doOrder]);
+  }, [order, showPlanets, doOrder]);
 
   const contextValue = {
     planets,

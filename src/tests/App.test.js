@@ -122,4 +122,40 @@ describe('Testing the App', () => {
     expect(planetYav.innerHTML).toBe('Yavin IV')
     expect(planetTatooine).not.toBeInTheDocument();
   })
+
+  test('Order filter should order each item correctly', async () => {
+    global.fetch = jest.fn(() => Promise.resolve({
+      json: () => Promise.resolve(fetchMock),
+    }));
+  
+    render(<App />);
+
+    let columnSort = await screen.findByTestId('column-sort');
+    expect(columnSort.value).toBe('population');
+    const radioDesc = screen.getByTestId('column-sort-input-desc');
+    const radioAsc = screen.getByTestId('column-sort-input-asc');
+    const sortBtn = screen.getByTestId('column-sort-button');
+
+    userEvent.selectOptions(columnSort, 'diameter');
+    userEvent.click(radioDesc);
+    userEvent.click(sortBtn);
+
+    let planets = await screen.findAllByTestId('planet-name');
+
+    expect(planets[0].innerHTML).toBe('Bespin');
+    expect(planets[1].innerHTML).toBe('Kamino');
+    expect(planets[2].innerHTML).toBe('Alderaan');
+    expect(planets[9].innerHTML).toBe('Endor');
+
+    userEvent.selectOptions(columnSort, 'rotation_period');
+    userEvent.click(radioAsc);
+    userEvent.click(sortBtn);
+
+    planets = await screen.findAllByTestId('planet-name');
+
+    expect(planets[0].innerHTML).toBe('Bespin');
+    expect(planets[1].innerHTML).toBe('Endor');
+    expect(planets[2].innerHTML).toBe('Tatooines');
+    expect(planets[9].innerHTML).toBe('Kamino');
+  })
 })
