@@ -8,15 +8,23 @@ const selectValues = [
   'population', 'orbital_period', 'diameter', 'rotation_period', 'surface_water',
 ];
 
-const rangeForRandom = 9999999999;
-const random = () => Math.floor(Math.random() * rangeForRandom);
+const initialOrder = {
+  column: 'population',
+  sort: '',
+};
+
+const random = () => {
+  const rangeForRandom = 9999999999;
+  return Math.floor(Math.random() * rangeForRandom);
+};
 
 function Provider({ children }) {
   const [planets, setPlanets] = useState([]);
   const [inputFilterName, setInputFilterName] = useState('');
   const [filterByNumericValues, setFilterByNumericValues] = useState([]);
   const [showPlanets, setShowPlanets] = useState([]);
-  const [order, setOrder] = useState({});
+  const [order, setOrder] = useState(initialOrder);
+  const [doOrder, setDoOrder] = useState(false);
 
   const getPlanets = async () => {
     const data0 = await fetch(urlToFetch).then((info) => info.json());
@@ -28,6 +36,18 @@ function Provider({ children }) {
   const inputHandler = ({ target }) => {
     const { value } = target;
     setInputFilterName(value);
+  };
+
+  const orderHandler = ({ target }) => {
+    const { name, value } = target;
+    setOrder((before) => ({
+      ...before,
+      [name]: value,
+    }));
+  };
+
+  const sendOrderHandler = () => {
+    setDoOrder(true);
   };
 
   useEffect(() => {
@@ -45,19 +65,19 @@ function Provider({ children }) {
     let planetasFiltrados = planets;
     const filterParameters = (param) => {
       const { column, comparison, value } = param;
-      if (comparison === 'igual a') {
+      switch (comparison) {
+      case 'igual a':
         planetasFiltrados = planetasFiltrados
           .filter((planet) => +planet[column] === +value);
-      }
-      if (comparison === 'maior que') {
+        break;
+      case 'maior que':
         planetasFiltrados = planetasFiltrados
           .filter((planet) => +planet[column] > +value);
+        break;
+      default: planetasFiltrados = planetasFiltrados
+        .filter((planet) => +planet[column] < +value);
+        break;
       }
-      if (comparison === 'menor que') {
-        planetasFiltrados = planetasFiltrados
-          .filter((planet) => +planet[column] < +value);
-      }
-      return planetasFiltrados;
     };
 
     if (planets.length > 0 && filterByNumericValues.length > 0) {
@@ -65,6 +85,27 @@ function Provider({ children }) {
       setShowPlanets(planetasFiltrados);
     }
   }, [planets, inputFilterName, filterByNumericValues]);
+
+  useEffect(() => {
+    const sortParameters = (param) => {
+      let planetasSorteados = planets;
+      setDoOrder(false);
+      const { column, sort } = param;
+      if (sort === 'ASC') {
+        planetasSorteados = planetasSorteados
+          .sort((a, b) => b[column] - a[column]);
+
+        planetasSorteados = planetasSorteados
+          .sort((a, b) => a[column] - b[column]);
+      }
+      if (sort === 'DESC') {
+        planetasSorteados = planetasSorteados
+          .sort((a, b) => b[column] - a[column]);
+      }
+      setShowPlanets(planetasSorteados);
+    };
+    if (doOrder) sortParameters(order);
+  }, [order, planets, doOrder]);
 
   const contextValue = {
     planets,
@@ -77,6 +118,9 @@ function Provider({ children }) {
     setOrder,
     selectValues,
     random,
+    initialOrder,
+    orderHandler,
+    sendOrderHandler,
   };
 
   return (
